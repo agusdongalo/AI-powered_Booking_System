@@ -3,8 +3,8 @@ import './globals.css'
 import { Toaster } from '@/components/sonner'
 
 export const metadata: Metadata = {
-  title: 'Salon Booking + AI Assistant',
-  description: 'Book your salon appointment with AI assistance',
+  title: 'Glamour Studio | AI Booking Lounge',
+  description: 'A glassmorphism homepage for AI-assisted salon booking.',
 }
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50">
+      <body className="bg-background text-foreground antialiased">
         {children}
         <Toaster />
       </body>

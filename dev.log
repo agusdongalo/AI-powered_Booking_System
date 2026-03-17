@@ -1,0 +1,14 @@
+
+> salon-booking-app@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.100.12:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.9s
+ ○ Compiling / ...
+ ✓ Compiled / in 14.8s (2482 modules)
+ GET / 200 in 415ms
+ GET / 200 in 404ms

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Check } from 'lucide-react';
 import {
@@ -15,7 +15,6 @@ import { Label } from './label';
 import { Input } from './input';
 import { Calendar } from './calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 import { services, stylists, generateTimeSlots } from '@/lib/mock-data';
 import { toast } from 'sonner';
@@ -40,6 +39,18 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
   const availableSlots = selectedDate && selectedStylist && service
     ? generateTimeSlots(selectedDate, selectedStylist, service.duration)
     : [];
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setStep(1);
+    setSelectedService(preSelectedServiceId || '');
+    setSelectedStylist('');
+    setSelectedDate(undefined);
+    setSelectedTime('');
+    setCustomerName('');
+    setCustomerPhone('');
+  }, [isOpen, preSelectedServiceId]);
 
   const handleConfirmBooking = () => {
     if (!customerName || !customerPhone || !selectedService || !selectedStylist || !selectedDate || !selectedTime) {
