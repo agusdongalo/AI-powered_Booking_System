@@ -1,20 +1,20 @@
-'use client';
+'use client'
 
-import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { Send, Bot, User, ArrowLeft, Sparkles } from 'lucide-react';
-import { Button } from './button';
-import { Input } from './input';
-import { Card } from './card';
-import { Avatar, AvatarFallback, AvatarImage } from './avatar';
-import { services, stylists, generateTimeSlots } from '@/lib/mock-data';
-import { format } from 'date-fns';
+import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import { format } from 'date-fns'
+import { ArrowLeft, Bot, MessageCircle, Send, Sparkles, User } from 'lucide-react'
+import { Button } from './button'
+import { Input } from './input'
+import { Avatar, AvatarFallback } from './avatar'
+import { Card } from './card'
+import { services, stylists, generateTimeSlots } from '@/lib/mock-data'
 
 interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
 }
 
 export function AIChat() {
@@ -22,277 +22,282 @@ export function AIChat() {
     {
       id: '1',
       role: 'assistant',
-      content: "Hi! I'm your AI salon assistant. I can help you book appointments, check availability, answer questions about our services, or reschedule existing bookings. How can I help you today?",
+      content:
+        "Hi, I'm the Glamour Studio assistant. I can help you book appointments, check availability, explain services, or find the right stylist.",
       timestamp: new Date(),
     },
-  ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  ])
+  const [input, setInput] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const generateAIResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
+    const lowerMessage = userMessage.toLowerCase()
 
-    // Check for greetings
     if (lowerMessage.match(/^(hi|hello|hey|good morning|good afternoon)/)) {
-      return "Hello! Welcome to Glamour Studio. I'm here to help you with bookings, service information, or any questions you have. What would you like to know?";
+      return "Hello. What would you like to do today: book a service, check available slots, or review stylist options?"
     }
 
-    // Check for availability queries
-    if (lowerMessage.includes('available') || lowerMessage.includes('slot') || lowerMessage.includes('time')) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const slots = generateTimeSlots(tomorrow, '2', 45); // Mike, 45 min service
-      
+    if (
+      lowerMessage.includes('available') ||
+      lowerMessage.includes('slot') ||
+      lowerMessage.includes('time')
+    ) {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const slots = generateTimeSlots(tomorrow, '2', 45)
+
       if (slots.length > 0) {
-        return `For tomorrow (${format(tomorrow, 'MMMM d')}), we have the following slots available:\n\n${slots.slice(0, 5).join(', ')}\n\nWould you like to book one of these times? Just let me know which service and stylist you prefer!`;
+        return `For tomorrow (${format(tomorrow, 'MMMM d')}), these slots are open:\n\n${slots
+          .slice(0, 5)
+          .join(', ')}\n\nIf you want, I can help you choose a service and stylist.`
       }
     }
 
-    // Check for pricing queries
-    if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('how much')) {
+    if (
+      lowerMessage.includes('price') ||
+      lowerMessage.includes('cost') ||
+      lowerMessage.includes('how much')
+    ) {
       if (lowerMessage.includes('balayage')) {
-        return "Balayage starts at $120 and usually takes about 2 hours. It's one of our most popular services! Would you like to book an appointment?";
+        return 'Balayage starts at $120 and takes about 2 hours.'
       }
       if (lowerMessage.includes('haircut')) {
-        return "A professional haircut is $20 and takes 45 minutes. We also offer additional styling if needed. Would you like to book?";
+        return 'A professional haircut is $20 and takes 45 minutes.'
       }
       if (lowerMessage.includes('color')) {
-        return "Our full hair color treatment is $80 and takes 1.5 hours. We use professional products for long-lasting results. Interested in booking?";
+        return 'Our hair color service is $80 and takes about 90 minutes.'
       }
-      
-      // General pricing
-      const priceList = services
-        .map((s) => `• ${s.name}: $${s.price} (${s.duration} min)`)
-        .join('\n');
-      return `Here are our service prices:\n\n${priceList}\n\nWhich service interests you?`;
+
+      return `Here are our service prices:\n\n${services
+        .map((s) => `- ${s.name}: $${s.price} (${s.duration} min)`)
+        .join('\n')}`
     }
 
-    // Check for service information
-    if (lowerMessage.includes('service') || lowerMessage.includes('offer') || lowerMessage.includes('what do you')) {
-      return `We offer the following services:\n\n${services.map((s) => `• ${s.name} - ${s.description} ($${s.price}, ${s.duration} min)`).join('\n')}\n\nWould you like to book any of these?`;
+    if (lowerMessage.includes('service') || lowerMessage.includes('offer')) {
+      return `We offer:\n\n${services
+        .map((s) => `- ${s.name}: ${s.description}`)
+        .join('\n')}\n\nTell me which one you want and I can help you book it.`
     }
 
-    // Check for stylist queries
-    if (lowerMessage.includes('stylist') || lowerMessage.includes('who') || lowerMessage.includes('staff')) {
-      return `Our talented stylists:\n\n${stylists.map((s) => `• ${s.name} - Specialty: ${s.specialty} (Available ${s.workingHours.start}-${s.workingHours.end})`).join('\n')}\n\nWho would you like to book with?`;
+    if (lowerMessage.includes('stylist') || lowerMessage.includes('staff')) {
+      return `Our stylists:\n\n${stylists
+        .map((s) => `- ${s.name}: ${s.specialty}`)
+        .join('\n')}`
     }
 
-    // Check for booking intent
-    if (lowerMessage.includes('book') || lowerMessage.includes('appointment') || lowerMessage.includes('schedule')) {
-      return "I'd love to help you book an appointment! To get started, please tell me:\n\n1. Which service would you like?\n2. Do you have a preferred stylist?\n3. What date works best for you?\n\nOr you can use the 'Book Now' button on any service card on our homepage!";
+    if (lowerMessage.includes('book') || lowerMessage.includes('appointment')) {
+      return 'I can help you book an appointment. Tell me which service you want, your preferred stylist, and your ideal date.'
     }
 
-    // Check for rescheduling
-    if (lowerMessage.includes('reschedule') || lowerMessage.includes('move') || lowerMessage.includes('change')) {
-      return "I can help you reschedule your appointment. To do this, I'll need:\n\n1. Your current appointment date/time\n2. Your preferred new date/time\n\nPlease provide these details and I'll check availability for you.";
+    if (lowerMessage.includes('reschedule')) {
+      return 'I can help reschedule an appointment. Share the current date and time, plus your preferred new slot.'
     }
 
-    // Check for cancellation
     if (lowerMessage.includes('cancel')) {
-      return "I understand you need to cancel. Can you please provide:\n\n1. Your name\n2. Your appointment date and time\n\nI'll help you cancel the booking. We recommend canceling at least 24 hours in advance when possible.";
+      return 'I can help with cancellations. Share your name or booking ID and I will guide you through the next step.'
     }
 
-    // Check for upselling opportunities
-    if (lowerMessage.includes('haircut') && !lowerMessage.includes('price')) {
-      return "Great choice! A haircut is $20 and takes 45 minutes. Many of our customers also add a hair treatment ($35, 30 min) for extra shine and health. Would you like to combine these services?";
-    }
+    return 'I can help with booking, availability, services, stylists, or rescheduling. What would you like to do next?'
+  }
 
-    // Check for hours
-    if (lowerMessage.includes('hour') || lowerMessage.includes('open') || lowerMessage.includes('close')) {
-      return "Our salon hours vary by stylist:\n\n• Anna: 9:00 AM - 6:00 PM\n• Mike: 10:00 AM - 7:00 PM\n• Liza: 9:00 AM - 5:00 PM\n\nWe're open Monday through Saturday. Which stylist would you like to book with?";
-    }
-
-    // Default response
-    return "I'm here to help! I can assist you with:\n\n• Booking appointments\n• Checking availability\n• Service prices and information\n• Rescheduling or canceling bookings\n• Questions about our stylists\n\nWhat would you like to know?";
-  };
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const handleSend = () => {
+    if (!input.trim()) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input,
       timestamp: new Date(),
-    };
+    }
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsTyping(true);
+    const currentInput = input
+    setMessages((prev) => [...prev, userMessage])
+    setInput('')
+    setIsTyping(true)
 
-    // Simulate AI thinking time
     setTimeout(() => {
-      const aiResponse: Message = {
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: generateAIResponse(input),
+        content: generateAIResponse(currentInput),
         timestamp: new Date(),
-      };
+      }
 
-      setMessages((prev) => [...prev, aiResponse]);
-      setIsTyping(false);
-    }, 1000);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+      setMessages((prev) => [...prev, aiMessage])
+      setIsTyping(false)
+    }, 850)
+  }
 
   const quickQuestions = [
-    "Do you have slots tomorrow?",
-    "How much is balayage?",
-    "What services do you offer?",
-    "Who are your stylists?",
-  ];
+    'Do you have slots tomorrow?',
+    'How much is balayage?',
+    'What services do you offer?',
+    'Who are your stylists?',
+  ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white flex flex-col">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-4 shadow-lg">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-            asChild
-          >
-            <Link href="/">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <div className="flex items-center gap-3 flex-1">
-            <div className="relative">
-              <Avatar className="h-10 w-10 border-2 border-white">
-                <AvatarFallback className="bg-purple-700">
-                  <Bot className="h-6 w-6" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-400 rounded-full border-2 border-white"></div>
-            </div>
-            <div>
-              <h1 className="font-semibold">AI Salon Assistant</h1>
-              <p className="text-xs text-purple-100">Online • Always here to help</p>
-            </div>
-          </div>
-        </div>
+    <div className="relative min-h-[calc(100vh-2rem)] overflow-hidden bg-transparent">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-300/20 blur-3xl" />
+        <div className="absolute right-0 top-24 h-80 w-80 rounded-full bg-fuchsia-300/18 blur-3xl" />
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              {message.role === 'assistant' && (
-                <Avatar className="h-8 w-8 mt-1">
-                  <AvatarFallback className="bg-purple-100">
-                    <Bot className="h-5 w-5 text-purple-600" />
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              <div
-                className={`max-w-[80%] sm:max-w-[70%] ${
-                  message.role === 'user'
-                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
-                    : 'bg-white border border-gray-200'
-                } rounded-2xl px-4 py-3 shadow-sm`}
-              >
-                <p className="whitespace-pre-line text-sm sm:text-base">{message.content}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    message.role === 'user' ? 'text-purple-100' : 'text-gray-500'
-                  }`}
-                >
-                  {format(message.timestamp, 'HH:mm')}
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-5xl flex-col gap-6">
+        <Card className="border-slate-200 bg-white/80 p-5 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.18)] backdrop-blur-2xl">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900" asChild>
+                <Link href="/">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <Avatar className="h-11 w-11 border border-slate-200">
+                <AvatarFallback className="bg-cyan-100 text-cyan-700">
+                  <Bot className="h-5 w-5" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="display-font text-2xl font-semibold text-slate-900">
+                  AI Salon Assistant
+                </h1>
+                <p className="text-sm text-slate-500">
+                  Online now, ready to help you book
                 </p>
               </div>
-              {message.role === 'user' && (
-                <Avatar className="h-8 w-8 mt-1">
-                  <AvatarFallback className="bg-pink-100">
-                    <User className="h-5 w-5 text-pink-600" />
-                  </AvatarFallback>
-                </Avatar>
-              )}
             </div>
-          ))}
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm text-cyan-800">
+              <Sparkles className="h-4 w-4" />
+              Concierge mode
+            </div>
+          </div>
+        </Card>
 
-          {isTyping && (
-            <div className="flex gap-3 justify-start">
-              <Avatar className="h-8 w-8 mt-1">
-                <AvatarFallback className="bg-purple-100">
-                  <Bot className="h-5 w-5 text-purple-600" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                </div>
+        <Card className="flex-1 border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.18)] backdrop-blur-2xl">
+          <div className="flex h-[60vh] flex-col">
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex items-end gap-3 ${
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    {message.role === 'assistant' ? (
+                      <Avatar className="h-9 w-9 border border-slate-200">
+                        <AvatarFallback className="bg-cyan-100 text-cyan-700">
+                          <Bot className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : null}
+                    <div
+                      className={`max-w-[80%] rounded-3xl px-4 py-3 shadow-sm ${
+                        message.role === 'user'
+                          ? 'rounded-br-md bg-slate-900 text-white'
+                          : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'
+                      }`}
+                    >
+                      <p className="whitespace-pre-line text-sm leading-7">
+                        {message.content}
+                      </p>
+                      <p
+                        className={`mt-1 text-xs ${
+                          message.role === 'user' ? 'text-slate-300' : 'text-slate-500'
+                        }`}
+                      >
+                        {format(message.timestamp, 'HH:mm')}
+                      </p>
+                    </div>
+                    {message.role === 'user' ? (
+                      <Avatar className="h-9 w-9 border border-slate-200">
+                        <AvatarFallback className="bg-slate-100 text-slate-700">
+                          <User className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : null}
+                  </div>
+                ))}
+
+                {isTyping ? (
+                  <div className="flex items-end gap-3 justify-start">
+                    <Avatar className="h-9 w-9 border border-slate-200">
+                      <AvatarFallback className="bg-cyan-100 text-cyan-700">
+                        <Bot className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="rounded-3xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                      <div className="flex gap-1">
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+                        <div
+                          className="h-2 w-2 animate-bounce rounded-full bg-slate-400"
+                          style={{ animationDelay: '0.15s' }}
+                        />
+                        <div
+                          className="h-2 w-2 animate-bounce rounded-full bg-slate-400"
+                          style={{ animationDelay: '0.3s' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div ref={messagesEndRef} />
               </div>
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
 
-      {/* Quick Questions */}
-      {messages.length <= 1 && (
-        <div className="max-w-4xl mx-auto px-4 pb-4">
-          <div className="flex items-center gap-2 mb-3 text-sm text-gray-600">
-            <Sparkles className="h-4 w-4" />
-            <span>Quick questions:</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {quickQuestions.map((question, index) => (
-              <button
-                key={index}
-                onClick={() => setInput(question)}
-                className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-pink-300 hover:bg-pink-50 transition-colors text-sm"
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+            {messages.length <= 1 ? (
+              <div className="border-t border-slate-200 px-6 pb-5 pt-4">
+                <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
+                  <Sparkles className="h-4 w-4 text-cyan-700" />
+                  Quick questions
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {quickQuestions.map((question) => (
+                    <button
+                      key={question}
+                      type="button"
+                      onClick={() => setInput(question)}
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50"
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
-      {/* Input */}
-      <div className="border-t bg-white p-4 shadow-lg">
-        <div className="max-w-4xl mx-auto flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1"
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-            size="icon"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+            <div className="border-t border-slate-200 p-4">
+              <div className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSend()
+                    }
+                  }}
+                  placeholder="Ask about prices, availability, booking, or stylists..."
+                  className="h-12 rounded-2xl border-slate-300 bg-white/90"
+                />
+                <Button
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  className="h-12 rounded-2xl bg-slate-900 px-5 text-white hover:bg-slate-800"
+                >
+                  <Send className="h-4 w-4" />
+                  Send
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
-  );
+  )
 }

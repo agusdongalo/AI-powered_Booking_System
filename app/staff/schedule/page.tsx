@@ -1,5 +1,10 @@
 'use client'
 
+import { CalendarDays, Clock3, Plus } from 'lucide-react'
+import { SiteShell } from '@/components/site-shell'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@/components/button'
+
 export default function SchedulePage() {
   const stylists = [
     { id: 1, name: 'Anna', specialty: 'Coloring' },
@@ -16,109 +21,102 @@ export default function SchedulePage() {
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Daily Schedule</h1>
+    <SiteShell
+      title="Daily Schedule"
+      description="A clean, grid-based view of today’s appointments."
+      navHref="/staff"
+      navLabel="Staff"
+      backHref="/staff"
+      accent="fuchsia"
+    >
+      <div className="space-y-6">
+        <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+          <CardHeader>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <CardTitle className="display-font text-3xl text-slate-900">
+                  Today: March 15, 2024
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Friday
+                </CardDescription>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                  Previous
+                </Button>
+                <Button variant="outline" className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                  Today
+                </Button>
+                <Button className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                  Next
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
 
-      {/* Calendar Header */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Today: March 15, 2024
-            </h2>
-            <p className="text-gray-600">Friday</p>
-          </div>
-          <div className="flex gap-2">
-            <button className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">
-              ← Previous
-            </button>
-            <button className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">
-              Today
-            </button>
-            <button className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">
-              Next →
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Schedule Grid */}
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white rounded-lg shadow">
-          <thead className="bg-gray-100 border-b border-gray-200">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-20">
-                Time
-              </th>
-              {stylists.map((stylist) => (
-                <th
-                  key={stylist.id}
-                  className="px-4 py-3 text-left text-sm font-semibold text-gray-900"
-                >
-                  <div>{stylist.name}</div>
-                  <div className="text-xs text-gray-600 font-normal">
-                    {stylist.specialty}
-                  </div>
+        <div className="overflow-x-auto rounded-[28px] border border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+          <table className="w-full">
+            <thead className="border-b border-slate-200 bg-slate-50">
+              <tr>
+                <th className="w-24 px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                  Time
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {timeSlots.map((time, idx) => (
-              <tr
-                key={idx}
-                className={`border-b border-gray-200 ${
-                  idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                }`}
-              >
-                <td className="px-4 py-4 text-sm font-semibold text-gray-900">
-                  {time}
-                </td>
-                {stylists.map((stylist) => {
-                  const key = `${stylist.name}-${time}`
-                  const slot = bookings[key]
-                  return (
-                    <td
-                      key={`${stylist.id}-${time}`}
-                      className="px-4 py-4 text-sm"
-                    >
-                      {slot ? (
-                        <div className="bg-green-100 border border-green-300 rounded p-2">
-                          <p className="font-semibold text-green-900">
-                            {slot[0].customer}
-                          </p>
-                          <p className="text-xs text-green-700">
-                            {slot[0].service}
-                          </p>
-                        </div>
-                      ) : (
-                        <button className="w-full h-12 bg-gray-100 hover:bg-pink-50 border border-gray-300 rounded text-gray-400 hover:text-pink-600 transition">
-                          +
-                        </button>
-                      )}
-                    </td>
-                  )
-                })}
+                {stylists.map((stylist) => (
+                  <th key={stylist.id} className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                    <div>{stylist.name}</div>
+                    <div className="text-xs font-normal text-slate-500">{stylist.specialty}</div>
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Legend */}
-      <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-2">Legend</h3>
-        <div className="flex gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-            <span className="text-sm text-gray-700">Booked</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded"></div>
-            <span className="text-sm text-gray-700">Available</span>
-          </div>
+            </thead>
+            <tbody>
+              {timeSlots.map((time, idx) => (
+                <tr key={idx} className="border-b border-slate-100">
+                  <td className="px-4 py-4 text-sm font-semibold text-slate-900">{time}</td>
+                  {stylists.map((stylist) => {
+                    const key = `${stylist.name}-${time}`
+                    const slot = bookings[key]
+                    return (
+                      <td key={`${stylist.id}-${time}`} className="px-4 py-4 text-sm">
+                        {slot ? (
+                          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3">
+                            <p className="font-semibold text-emerald-800">{slot[0].customer}</p>
+                            <p className="text-xs text-emerald-700">{slot[0].service}</p>
+                          </div>
+                        ) : (
+                          <button className="flex h-12 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700">
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+
+        <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+          <CardHeader>
+            <CardTitle className="display-font text-2xl text-slate-900">
+              Legend
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-6 text-sm text-slate-600">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 rounded border border-emerald-200 bg-emerald-50" />
+              Booked
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 rounded border border-slate-200 bg-white" />
+              Available
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </SiteShell>
   )
 }

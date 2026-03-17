@@ -81,7 +81,7 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-slate-200 bg-white/95 text-slate-900 backdrop-blur-2xl">
         <DialogHeader>
           <DialogTitle>Book Your Appointment</DialogTitle>
           <DialogDescription>
@@ -107,9 +107,9 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
                       setSelectedService(service.id);
                       setStep(2);
                     }}
-                    className={`p-4 border-2 rounded-lg text-left transition-all hover:border-pink-500 ${
+                    className={`p-4 border-2 rounded-lg text-left transition-all hover:border-cyan-300 ${
                       selectedService === service.id
-                        ? 'border-pink-500 bg-pink-50'
+                        ? 'border-cyan-400 bg-cyan-50'
                         : 'border-gray-200'
                     }`}
                   >
@@ -119,7 +119,7 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
                         <div className="text-sm text-gray-600">{service.description}</div>
                         <div className="text-sm text-gray-500 mt-1">{service.duration} minutes</div>
                       </div>
-                      <div className="text-pink-600 font-semibold">${service.price}</div>
+                      <div className="font-semibold text-cyan-700">${service.price}</div>
                     </div>
                   </button>
                 ))}
@@ -139,9 +139,9 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
                       setSelectedStylist(stylist.id);
                       setStep(3);
                     }}
-                    className={`p-4 border-2 rounded-lg text-left transition-all hover:border-pink-500 ${
+                    className={`p-4 border-2 rounded-lg text-left transition-all hover:border-cyan-300 ${
                       selectedStylist === stylist.id
-                        ? 'border-pink-500 bg-pink-50'
+                        ? 'border-cyan-400 bg-cyan-50'
                         : 'border-gray-200'
                     }`}
                   >
@@ -206,9 +206,9 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
                             setSelectedTime(slot);
                             setStep(4);
                           }}
-                          className={`p-3 border-2 rounded-lg text-sm transition-all hover:border-pink-500 ${
-                            selectedTime === slot
-                              ? 'border-pink-500 bg-pink-50'
+                            className={`p-3 border-2 rounded-lg text-sm transition-all hover:border-cyan-300 ${
+                              selectedTime === slot
+                              ? 'border-cyan-400 bg-cyan-50'
                               : 'border-gray-200'
                           }`}
                         >
@@ -255,7 +255,7 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
                 />
               </div>
 
-              <div className="bg-pink-50 p-4 rounded-lg space-y-2">
+              <div className="rounded-lg border border-cyan-100 bg-cyan-50 p-4 space-y-2">
                 <h4 className="font-semibold">Booking Summary</h4>
                 <div className="text-sm space-y-1">
                   <div><span className="text-gray-600">Service:</span> {service?.name}</div>
@@ -263,8 +263,8 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
                   <div><span className="text-gray-600">Date:</span> {selectedDate && format(selectedDate, 'MMMM d, yyyy')}</div>
                   <div><span className="text-gray-600">Time:</span> {selectedTime}</div>
                   <div><span className="text-gray-600">Duration:</span> {service?.duration} minutes</div>
-                  <div className="pt-2 border-t border-pink-200">
-                    <span className="text-gray-600">Total:</span> <span className="font-semibold text-pink-600">${service?.price}</span>
+                  <div className="pt-2 border-t border-cyan-200">
+                    <span className="text-gray-600">Total:</span> <span className="font-semibold text-cyan-700">${service?.price}</span>
                   </div>
                 </div>
               </div>
@@ -275,7 +275,7 @@ export function BookingDialog({ isOpen, onClose, preSelectedServiceId }: Booking
                 </Button>
                 <Button
                   onClick={handleConfirmBooking}
-                  className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+                  className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
                 >
                   <Check className="mr-2 h-4 w-4" />
                   Confirm Booking

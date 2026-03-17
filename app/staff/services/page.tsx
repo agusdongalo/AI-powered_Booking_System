@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { SiteShell } from '@/components/site-shell'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@/components/button'
 
 interface Service {
   id: number
@@ -12,34 +15,10 @@ interface Service {
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([
-    {
-      id: 1,
-      name: 'Haircut',
-      duration: 45,
-      price: 20,
-      description: 'Standard haircut and styling',
-    },
-    {
-      id: 2,
-      name: 'Hair Color',
-      duration: 90,
-      price: 80,
-      description: 'Full hair coloring service',
-    },
-    {
-      id: 3,
-      name: 'Balayage',
-      duration: 120,
-      price: 120,
-      description: 'Balayage highlighting technique',
-    },
-    {
-      id: 4,
-      name: 'Hair Treatment',
-      duration: 60,
-      price: 50,
-      description: 'Deep conditioning and treatment',
-    },
+    { id: 1, name: 'Haircut', duration: 45, price: 20, description: 'Standard haircut and styling' },
+    { id: 2, name: 'Hair Color', duration: 90, price: 80, description: 'Full hair coloring service' },
+    { id: 3, name: 'Balayage', duration: 120, price: 120, description: 'Balayage highlighting technique' },
+    { id: 4, name: 'Hair Treatment', duration: 60, price: 50, description: 'Deep conditioning and treatment' },
   ])
 
   const [showForm, setShowForm] = useState(false)
@@ -103,154 +82,94 @@ export default function ServicesPage() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Services</h1>
-        <button
-          onClick={handleAddService}
-          className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition font-semibold"
-        >
-          + Add Service
-        </button>
-      </div>
-
-      {/* Add/Edit Form */}
-      {showForm && (
-        <div className="bg-white rounded-lg shadow p-6 mb-8 border-l-4 border-pink-600">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {editingId ? 'Edit Service' : 'Add New Service'}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Service Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="e.g., Hair Color"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Duration (minutes)
-              </label>
-              <input
-                type="number"
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData({ ...formData, duration: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="e.g., 90"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Price ($)
-              </label>
-              <input
-                type="number"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="e.g., 80"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Description
-              </label>
-              <input
-                type="text"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="Brief description"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={handleSaveService}
-              className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition font-semibold"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setShowForm(false)}
-              className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
-            >
-              Cancel
-            </button>
-          </div>
+    <SiteShell
+      title="Service Management"
+      description="Update treatment pricing, duration, and descriptions from a glass control panel."
+      navHref="/staff"
+      navLabel="Staff"
+      backHref="/staff"
+      accent="fuchsia"
+    >
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="display-font text-3xl text-slate-900">Services</h2>
+          <Button onClick={handleAddService} className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+            + Add service
+          </Button>
         </div>
-      )}
 
-      {/* Services Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-100 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                Service
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                Duration
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                Description
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {services.map((service) => (
-              <tr key={service.id} className="border-b border-gray-200">
-                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                  {service.name}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {service.duration} min
-                </td>
-                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                  ${service.price}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {service.description}
-                </td>
-                <td className="px-6 py-4 text-sm flex gap-2">
-                  <button
-                    onClick={() => handleEditService(service)}
-                    className="text-blue-600 hover:text-blue-700 font-semibold"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteService(service.id)}
-                    className="text-red-600 hover:text-red-700 font-semibold"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {showForm ? (
+          <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+            <CardHeader>
+              <CardTitle className="display-font text-2xl text-slate-900">
+                {editingId ? 'Edit service' : 'Add new service'}
+              </CardTitle>
+              <CardDescription className="text-slate-600">
+                Keep the booking menu current.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              {(['name', 'duration', 'price', 'description'] as const).map((field) => (
+                <div key={field} className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-700 capitalize">
+                    {field}
+                  </label>
+                  <input
+                    type={field === 'duration' || field === 'price' ? 'number' : 'text'}
+                    value={formData[field]}
+                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                    className="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-900 outline-none focus:border-cyan-500"
+                  />
+                </div>
+              ))}
+              <div className="md:col-span-2 flex gap-3 pt-2">
+                <Button onClick={handleSaveService} className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                  Save
+                </Button>
+                <Button variant="outline" onClick={() => setShowForm(false)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+          <CardContent className="overflow-x-auto p-0">
+            <table className="w-full">
+              <thead className="border-b border-slate-200 bg-slate-50">
+                <tr>
+                  {['Service', 'Duration', 'Price', 'Description', 'Action'].map((header) => (
+                    <th key={header} className="px-6 py-4 text-left text-sm font-semibold text-slate-900">
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {services.map((service) => (
+                  <tr key={service.id} className="border-b border-slate-100">
+                    <td className="px-6 py-4 font-semibold text-slate-900">{service.name}</td>
+                    <td className="px-6 py-4 text-slate-600">{service.duration} min</td>
+                    <td className="px-6 py-4 text-slate-900">${service.price}</td>
+                    <td className="px-6 py-4 text-slate-600">{service.description}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => handleEditService(service)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                          Edit
+                        </Button>
+                        <Button variant="outline" onClick={() => handleDeleteService(service.id)} className="rounded-full border-red-200 bg-white text-red-700 hover:bg-red-50">
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </SiteShell>
   )
 }

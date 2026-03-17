@@ -1,6 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { SiteShell } from '@/components/site-shell'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@/components/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/avatar'
 
 interface Stylist {
   id: number
@@ -12,27 +16,9 @@ interface Stylist {
 
 export default function StylistsPage() {
   const [stylists, setStylists] = useState<Stylist[]>([
-    {
-      id: 1,
-      name: 'Anna',
-      specialty: 'Coloring',
-      workingHours: '9:00 AM - 5:00 PM',
-      phone: '555-0101',
-    },
-    {
-      id: 2,
-      name: 'Mike',
-      specialty: "Men's haircut",
-      workingHours: '9:00 AM - 6:00 PM',
-      phone: '555-0102',
-    },
-    {
-      id: 3,
-      name: 'Liza',
-      specialty: 'Styling',
-      workingHours: '10:00 AM - 5:00 PM',
-      phone: '555-0103',
-    },
+    { id: 1, name: 'Anna', specialty: 'Coloring', workingHours: '9:00 AM - 5:00 PM', phone: '555-0101' },
+    { id: 2, name: 'Mike', specialty: "Men's haircut", workingHours: '9:00 AM - 6:00 PM', phone: '555-0102' },
+    { id: 3, name: 'Liza', specialty: 'Styling', workingHours: '10:00 AM - 5:00 PM', phone: '555-0103' },
   ])
 
   const [showForm, setShowForm] = useState(false)
@@ -96,136 +82,102 @@ export default function StylistsPage() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Stylists</h1>
-        <button
-          onClick={handleAddStylist}
-          className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition font-semibold"
-        >
-          + Add Stylist
-        </button>
-      </div>
-
-      {/* Add/Edit Form */}
-      {showForm && (
-        <div className="bg-white rounded-lg shadow p-6 mb-8 border-l-4 border-pink-600">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {editingId ? 'Edit Stylist' : 'Add New Stylist'}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="e.g., Anna"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Specialty
-              </label>
-              <input
-                type="text"
-                value={formData.specialty}
-                onChange={(e) =>
-                  setFormData({ ...formData, specialty: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="e.g., Coloring"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Working Hours
-              </label>
-              <input
-                type="text"
-                value={formData.workingHours}
-                onChange={(e) =>
-                  setFormData({ ...formData, workingHours: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="e.g., 9:00 AM - 5:00 PM"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Phone
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
-                placeholder="e.g., 555-0100"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={handleSaveStylist}
-              className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition font-semibold"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setShowForm(false)}
-              className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
-            >
-              Cancel
-            </button>
-          </div>
+    <SiteShell
+      title="Stylist Management"
+      description="Update stylist profiles, specialty, and working hours."
+      navHref="/staff"
+      navLabel="Staff"
+      backHref="/staff"
+      accent="fuchsia"
+    >
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="display-font text-3xl text-slate-900">Stylists</h2>
+          <Button onClick={handleAddStylist} className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+            + Add stylist
+          </Button>
         </div>
-      )}
 
-      {/* Stylists Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {stylists.map((stylist) => (
-          <div key={stylist.id} className="bg-white rounded-lg shadow p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {stylist.name}
-                </h2>
-                <p className="text-pink-600 font-medium">{stylist.specialty}</p>
+        {showForm ? (
+          <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+            <CardHeader>
+              <CardTitle className="display-font text-2xl text-slate-900">
+                {editingId ? 'Edit stylist' : 'Add new stylist'}
+              </CardTitle>
+              <CardDescription className="text-slate-600">
+                Keep your team profile up to date.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              {(['name', 'specialty', 'workingHours', 'phone'] as const).map((field) => (
+                <div key={field} className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-700 capitalize">
+                    {field}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData[field]}
+                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                    className="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-900 outline-none focus:border-cyan-500"
+                  />
+                </div>
+              ))}
+              <div className="md:col-span-2 flex gap-3 pt-2">
+                <Button onClick={handleSaveStylist} className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                  Save
+                </Button>
+                <Button variant="outline" onClick={() => setShowForm(false)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                  Cancel
+                </Button>
               </div>
-              <div className="text-3xl">👩‍💼</div>
-            </div>
-            <div className="space-y-2 text-gray-600 mb-4">
-              <p>
-                <span className="font-medium">Hours:</span> {stylist.workingHours}
-              </p>
-              <p>
-                <span className="font-medium">Phone:</span> {stylist.phone}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleEditStylist(stylist)}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDeleteStylist(stylist.id)}
-                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-semibold"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {stylists.map((stylist) => (
+            <Card
+              key={stylist.id}
+              className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl"
+            >
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16 border border-slate-200">
+                    <AvatarImage src={`https://i.pravatar.cc/150?img=${stylist.id}`} alt={stylist.name} />
+                    <AvatarFallback>{stylist.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle className="display-font text-2xl text-slate-900">
+                      {stylist.name}
+                    </CardTitle>
+                    <CardDescription className="text-slate-600">
+                      {stylist.specialty}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                  <div className="font-medium text-slate-900">Working hours</div>
+                  {stylist.workingHours}
+                </div>
+                <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                  <div className="font-medium text-slate-900">Phone</div>
+                  {stylist.phone}
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={() => handleEditStylist(stylist)} className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                    Edit
+                  </Button>
+                  <Button onClick={() => handleDeleteStylist(stylist.id)} variant="outline" className="flex-1 rounded-full border-red-200 bg-white text-red-700 hover:bg-red-50">
+                    Delete
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
+    </SiteShell>
   )
 }

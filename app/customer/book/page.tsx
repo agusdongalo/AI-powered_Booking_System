@@ -1,12 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { CalendarDays, Clock3, Sparkles, UserRound, CheckCircle2 } from 'lucide-react'
+import { SiteShell } from '@/components/site-shell'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@/components/button'
 
 const services = [
-  { id: 1, name: 'Haircut', duration: 45, price: 20 },
-  { id: 2, name: 'Hair Color', duration: 90, price: 80 },
-  { id: 3, name: 'Balayage', duration: 120, price: 120 },
-  { id: 4, name: 'Hair Treatment', duration: 60, price: 50 },
+  { id: 1, name: 'Haircut', duration: 45, price: 20, description: 'Standard haircut and styling' },
+  { id: 2, name: 'Hair Color', duration: 90, price: 80, description: 'Full hair coloring service' },
+  { id: 3, name: 'Balayage', duration: 120, price: 120, description: 'Balayage highlighting technique' },
+  { id: 4, name: 'Hair Treatment', duration: 60, price: 50, description: 'Deep conditioning and treatment' },
 ]
 
 const stylists = [
@@ -15,16 +19,7 @@ const stylists = [
   { id: 3, name: 'Liza', specialty: 'Styling' },
 ]
 
-const timeSlots = [
-  '09:00 AM',
-  '10:00 AM',
-  '11:00 AM',
-  '1:00 PM',
-  '2:00 PM',
-  '3:00 PM',
-  '4:00 PM',
-  '5:00 PM',
-]
+const timeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM']
 
 export default function BookingPage() {
   const [step, setStep] = useState(1)
@@ -35,249 +30,265 @@ export default function BookingPage() {
   const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
 
+  const currentService = services.find((service) => service.id === selectedService)
+  const currentStylist = stylists.find((stylist) => stylist.id === selectedStylist)
+
+  const stepTitles = ['Service', 'Stylist', 'Date & Time', 'Details', 'Confirm']
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     alert(
-      `Booking confirmed!\nService: ${selectedService}\nStylist: ${selectedStylist}\nDate: ${selectedDate}\nTime: ${selectedTime}`
+      `Booking confirmed!\nService: ${currentService?.name}\nStylist: ${currentStylist?.name}\nDate: ${selectedDate}\nTime: ${selectedTime}`
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Book Your Appointment</h1>
-
-      {/* Progress Bar */}
-      <div className="mb-8 flex justify-between items-center">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <div key={s} className="flex items-center">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                step >= s
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-300 text-gray-600'
-              }`}
-            >
-              {s}
+    <SiteShell
+      title="Book Your Appointment"
+      description="Choose a service, pick a stylist, and lock in a time in a streamlined glass booking flow."
+      navHref="/customer"
+      navLabel="Customer"
+      backHref="/customer"
+      accent="cyan"
+    >
+      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+          <CardHeader>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm text-cyan-800">
+              <Sparkles className="h-4 w-4" />
+              Booking progress
             </div>
-            {s < 5 && (
-              <div
-                className={`w-16 h-1 ${
-                  step > s ? 'bg-purple-600' : 'bg-gray-300'
-                }`}
-              ></div>
+            <CardTitle className="display-font text-3xl text-slate-900">
+              Step {step} of 5
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              {stepTitles[step - 1]}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              {stepTitles.map((label, index) => {
+                const active = step >= index + 1
+                return (
+                  <div
+                    key={label}
+                    className={`rounded-full px-4 py-2 text-sm font-medium ${
+                      active
+                        ? 'bg-slate-900 text-white'
+                        : 'border border-slate-200 bg-white text-slate-500'
+                    }`}
+                  >
+                    {index + 1}. {label}
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+          <CardHeader>
+            <CardTitle className="display-font text-3xl text-slate-900">
+              {step === 1 && 'Select a service'}
+              {step === 2 && 'Choose your stylist'}
+              {step === 3 && 'Pick date & time'}
+              {step === 4 && 'Your details'}
+              {step === 5 && 'Confirm booking'}
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              {step === 1 && 'Start by selecting the treatment you want.'}
+              {step === 2 && 'Choose the stylist that matches your preference.'}
+              {step === 3 && 'Pick the date and available time slot.'}
+              {step === 4 && 'Enter your contact details for the appointment.'}
+              {step === 5 && 'Review everything before you submit.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {step === 1 && (
+              <div className="grid gap-4 md:grid-cols-2">
+                {services.map((service) => (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedService(service.id)
+                      setStep(2)
+                    }}
+                    className={`rounded-[24px] border p-4 text-left transition ${
+                      selectedService === service.id
+                        ? 'border-cyan-200 bg-cyan-50'
+                        : 'border-slate-200 bg-white hover:border-cyan-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <h3 className="font-semibold text-slate-900">{service.name}</h3>
+                    <p className="mt-1 text-sm text-slate-600">{service.description}</p>
+                    <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
+                      <span>{service.duration} min</span>
+                      <span className="font-semibold text-slate-900">${service.price}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             )}
-          </div>
-        ))}
+
+            {step === 2 && (
+              <div className="space-y-3">
+                {stylists.map((stylist) => (
+                  <button
+                    key={stylist.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedStylist(stylist.id)
+                      setStep(3)
+                    }}
+                    className={`flex w-full items-center justify-between rounded-[24px] border p-4 text-left transition ${
+                      selectedStylist === stylist.id
+                        ? 'border-cyan-200 bg-cyan-50'
+                        : 'border-slate-200 bg-white hover:border-cyan-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-semibold text-slate-900">{stylist.name}</p>
+                      <p className="text-sm text-slate-600">{stylist.specialty}</p>
+                    </div>
+                    <UserRound className="h-5 w-5 text-cyan-700" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      className="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-900 outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                      Available times
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      {timeSlots.map((time) => (
+                        <button
+                          key={time}
+                          type="button"
+                          onClick={() => {
+                            setSelectedTime(time)
+                            setStep(4)
+                          }}
+                          className={`rounded-2xl border px-3 py-2 text-sm transition ${
+                            selectedTime === time
+                              ? 'border-cyan-200 bg-cyan-50 text-cyan-800'
+                              : 'border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          {time}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <Button variant="outline" onClick={() => setStep(2)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                  Back
+                </Button>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Full name
+                  </label>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-900 outline-none focus:border-cyan-500"
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    className="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-900 outline-none focus:border-cyan-500"
+                    placeholder="john@example.com"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep(3)} className="flex-1 rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                    Back
+                  </Button>
+                  <Button onClick={() => setStep(5)} className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                    Review
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === 5 && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+                  <div className="space-y-2 text-sm text-slate-700">
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Service</span>
+                      <span className="font-medium text-slate-900">{currentService?.name}</span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Stylist</span>
+                      <span className="font-medium text-slate-900">{currentStylist?.name}</span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Date</span>
+                      <span className="font-medium text-slate-900">{selectedDate || 'Not selected'}</span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-500">Time</span>
+                      <span className="font-medium text-slate-900">{selectedTime || 'Not selected'}</span>
+                    </div>
+                    <div className="flex justify-between gap-4 border-t border-slate-200 pt-3">
+                      <span className="text-slate-500">Total</span>
+                      <span className="text-lg font-semibold text-slate-900">
+                        ${currentService?.price}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep(4)} className="flex-1 rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                    Back
+                  </Button>
+                  <Button type="submit" className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Confirm booking
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            <div className="flex items-center gap-2 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-800">
+              <CalendarDays className="h-4 w-4" />
+              Selected service:
+              <span className="font-semibold text-slate-900">
+                {currentService?.name || 'None yet'}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      {/* Step 1: Select Service */}
-      {step === 1 && (
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Step 1: Select Service
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {services.map((service) => (
-              <button
-                key={service.id}
-                onClick={() => {
-                  setSelectedService(service.id)
-                  setStep(2)
-                }}
-                className={`p-4 rounded-lg border-2 text-left transition ${
-                  selectedService === service.id
-                    ? 'border-purple-600 bg-purple-50'
-                    : 'border-gray-200 bg-white hover:border-purple-300'
-                }`}
-              >
-                <h3 className="font-semibold text-gray-800">{service.name}</h3>
-                <p className="text-sm text-gray-600">
-                  {service.duration} min • ${service.price}
-                </p>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Step 2: Select Stylist */}
-      {step === 2 && (
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Step 2: Choose Stylist
-          </h2>
-          <div className="space-y-3">
-            {stylists.map((stylist) => (
-              <button
-                key={stylist.id}
-                onClick={() => {
-                  setSelectedStylist(stylist.id)
-                  setStep(3)
-                }}
-                className={`w-full p-4 rounded-lg border-2 text-left transition ${
-                  selectedStylist === stylist.id
-                    ? 'border-purple-600 bg-purple-50'
-                    : 'border-gray-200 bg-white hover:border-purple-300'
-                }`}
-              >
-                <h3 className="font-semibold text-gray-800">{stylist.name}</h3>
-                <p className="text-sm text-gray-600">{stylist.specialty}</p>
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setStep(1)}
-            className="mt-4 text-purple-600 hover:text-purple-700"
-          >
-            ← Back
-          </button>
-        </div>
-      )}
-
-      {/* Step 3: Select Date & Time */}
-      {step === 3 && (
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Step 3: Select Date & Time
-          </h2>
-          <div className="mb-6">
-            <label className="block text-gray-700 font-medium mb-2">
-              Date
-            </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-600"
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 font-medium mb-2">
-              Available Times
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {timeSlots.map((time) => (
-                <button
-                  key={time}
-                  onClick={() => {
-                    setSelectedTime(time)
-                    setStep(4)
-                  }}
-                  className={`p-2 rounded-lg border-2 text-sm transition ${
-                    selectedTime === time
-                      ? 'border-purple-600 bg-purple-50'
-                      : 'border-gray-200 bg-white hover:border-purple-300'
-                  }`}
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button
-            onClick={() => setStep(2)}
-            className="text-purple-600 hover:text-purple-700"
-          >
-            ← Back
-          </button>
-        </div>
-      )}
-
-      {/* Step 4: Customer Details */}
-      {step === 4 && (
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Step 4: Your Details
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-600"
-                placeholder="John Doe"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-600"
-                placeholder="john@example.com"
-              />
-            </div>
-          </div>
-          <button
-            onClick={() => setStep(3)}
-            className="mt-4 text-purple-600 hover:text-purple-700"
-          >
-            ← Back
-          </button>
-        </div>
-      )}
-
-      {/* Step 5: Review & Confirm */}
-      {step === 5 && (
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Step 5: Confirm Booking
-          </h2>
-          <div className="bg-gray-50 rounded-lg p-6 space-y-3 mb-6">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Service:</span>
-              <span className="font-semibold">
-                {services.find((s) => s.id === selectedService)?.name}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Stylist:</span>
-              <span className="font-semibold">
-                {stylists.find((s) => s.id === selectedStylist)?.name}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Date & Time:</span>
-              <span className="font-semibold">
-                {selectedDate} at {selectedTime}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Name:</span>
-              <span className="font-semibold">{customerName}</span>
-            </div>
-          </div>
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition mb-2"
-          >
-            Confirm Booking
-          </button>
-          <button
-            onClick={() => setStep(4)}
-            className="w-full text-purple-600 hover:text-purple-700 py-2"
-          >
-            ← Back
-          </button>
-        </div>
-      )}
-
-      {/* Next Button for Steps 1-4 */}
-      {step < 5 && step > 1 && (
-        <button
-          onClick={() => setStep(step + 1)}
-          className="mt-6 w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition"
-        >
-          Next
-        </button>
-      )}
-    </div>
+    </SiteShell>
   )
 }
