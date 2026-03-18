@@ -1,18 +1,56 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CalendarDays, Clock3, MessageCircle, Scissors, Sparkles, Users } from 'lucide-react'
 import { SiteShell } from './site-shell'
 import { Button } from './button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
 import { Avatar, AvatarFallback, AvatarImage } from './avatar'
-import { services, stylists } from '@/lib/mock-data'
 import { BookingDialog } from './booking-dialog'
+
+interface Service {
+  id: string
+  name: string
+  duration: number
+  price: number
+  description: string
+}
+
+interface Stylist {
+  id: string
+  name: string
+  specialty: string
+  avatar: string
+}
 
 export function CustomerBooking() {
   const [selectedService, setSelectedService] = useState<string | null>(null)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [services, setServices] = useState<Service[]>([])
+  const [stylists, setStylists] = useState<Stylist[]>([])
+
+  useEffect(() => {
+    const loadCatalog = async () => {
+      try {
+        const [servicesResponse, stylistsResponse] = await Promise.all([
+          fetch('/api/services'),
+          fetch('/api/stylists'),
+        ])
+
+        if (servicesResponse.ok) {
+          setServices(await servicesResponse.json())
+        }
+        if (stylistsResponse.ok) {
+          setStylists(await stylistsResponse.json())
+        }
+      } catch {
+        // The landing page still renders if the catalog fails to load.
+      }
+    }
+
+    void loadCatalog()
+  }, [])
 
   const handleBookService = (serviceId: string) => {
     setSelectedService(serviceId)
@@ -153,7 +191,7 @@ export function CustomerBooking() {
                   <Button
                     size="sm"
                     className="rounded-full bg-slate-900 text-white hover:bg-slate-800"
-                    onClick={() => handleBookService('1')}
+                    onClick={() => handleBookService(services[0]?.id || '1')}
                   >
                     Book
                   </Button>

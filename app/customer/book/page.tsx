@@ -1,46 +1,177 @@
 'use client'
 
-import { useState } from 'react'
-import { CalendarDays, Clock3, Sparkles, UserRound, CheckCircle2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { CalendarDays, CheckCircle2, Clock3, Loader2, Sparkles, UserRound } from 'lucide-react'
 import { SiteShell } from '@/components/site-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/button'
+import { toast } from 'sonner'
 
-const services = [
-  { id: 1, name: 'Haircut', duration: 45, price: 20, description: 'Standard haircut and styling' },
-  { id: 2, name: 'Hair Color', duration: 90, price: 80, description: 'Full hair coloring service' },
-  { id: 3, name: 'Balayage', duration: 120, price: 120, description: 'Balayage highlighting technique' },
-  { id: 4, name: 'Hair Treatment', duration: 60, price: 50, description: 'Deep conditioning and treatment' },
-]
+interface Service {
+  id: string
+  name: string
+  duration: number
+  price: number
+  description: string
+}
 
-const stylists = [
-  { id: 1, name: 'Anna', specialty: 'Coloring' },
-  { id: 2, name: 'Mike', specialty: "Men's haircut" },
-  { id: 3, name: 'Liza', specialty: 'Styling' },
-]
+interface Stylist {
+  id: string
+  name: string
+  specialty: string
+  avatar: string
+  workingHours: {
+    start: string
+    end: string
+  }
+}
 
-const timeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM']
+function toDateTime(date: string, time: string) {
+  return new Date(`${date}T${time.length === 5 ? `${time}:00` : time}`)
+}
 
 export default function BookingPage() {
   const [step, setStep] = useState(1)
-  const [selectedService, setSelectedService] = useState<number | null>(null)
-  const [selectedStylist, setSelectedStylist] = useState<number | null>(null)
+  const [services, setServices] = useState<Service[]>([])
+  const [stylists, setStylists] = useState<Stylist[]>([])
+  const [availableSlots, setAvailableSlots] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [selectedService, setSelectedService] = useState<string>('')
+  const [selectedStylist, setSelectedStylist] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [customerName, setCustomerName] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
 
-  const currentService = services.find((service) => service.id === selectedService)
-  const currentStylist = stylists.find((stylist) => stylist.id === selectedStylist)
+  const currentService = useMemo(
+    () => services.find((service) => service.id === selectedService),
+    [services, selectedService]
+  )
+  const currentStylist = useMemo(
+    () => stylists.find((stylist) => stylist.id === selectedStylist),
+    [stylists, selectedStylist]
+  )
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setLoading(true)
+
+      try {
+        const [servicesResponse, stylistsResponse] = await Promise.all([
+          fetch('/api/services'),
+          fetch('/api/stylists'),
+        ])
+
+        if (!servicesResponse.ok || !stylistsResponse.ok) {
+          throw new Error('Failed to load booking data')
+        }
+
+        const servicesData = await servicesResponse.json()
+        const stylistsData = await stylistsResponse.json()
+
+        setServices(servicesData)
+        setStylists(stylistsData)
+      } catch {
+        toast.error('Could not load booking options')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void loadInitialData()
+  }, [])
+
+  useEffect(() => {
+    if (!selectedDate || !selectedStylist || !currentService) {
+      setAvailableSlots([])
+      return
+    }
+
+    const controller = new AbortController()
+
+    const loadAvailability = async () => {
+      setLoadingSlots(true)
+
+      try {
+        const response = await fetch(
+          `/api/availability/check?date=${selectedDate}&stylistId=${selectedStylist}&duration=${currentService.duration}`,
+          { signal: controller.signal }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to load availability')
+        }
+
+        const data = await response.json()
+        setAvailableSlots(data.slots || [])
+      } catch {
+        if (!controller.signal.aborted) {
+          setAvailableSlots([])
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingSlots(false)
+        }
+      }
+    }
+
+    void loadAvailability()
+
+    return () => controller.abort()
+  }, [selectedDate, selectedStylist, currentService])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!currentService || !currentStylist || !selectedDate || !selectedTime) {
+      toast.error('Please complete the booking details')
+      return
+    }
+
+    setSubmitting(true)
+
+    try {
+      const response = await fetch('/api/bookings/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName,
+          customerPhone,
+          customerEmail,
+          serviceId: currentService.id,
+          stylistId: currentStylist.id,
+          startTime: toDateTime(selectedDate, selectedTime).toISOString(),
+          status: 'confirmed',
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || 'Booking failed')
+      }
+
+      toast.success('Booking confirmed')
+      setStep(1)
+      setSelectedService('')
+      setSelectedStylist('')
+      setSelectedDate('')
+      setSelectedTime('')
+      setCustomerName('')
+      setCustomerPhone('')
+      setCustomerEmail('')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Booking failed')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   const stepTitles = ['Service', 'Stylist', 'Date & Time', 'Details', 'Confirm']
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    alert(
-      `Booking confirmed!\nService: ${currentService?.name}\nStylist: ${currentStylist?.name}\nDate: ${selectedDate}\nTime: ${selectedTime}`
-    )
-  }
 
   return (
     <SiteShell
@@ -61,9 +192,7 @@ export default function BookingPage() {
             <CardTitle className="display-font text-3xl text-slate-900">
               Step {step} of 5
             </CardTitle>
-            <CardDescription className="text-slate-600">
-              {stepTitles[step - 1]}
-            </CardDescription>
+            <CardDescription className="text-slate-600">{stepTitles[step - 1]}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
@@ -98,12 +227,19 @@ export default function BookingPage() {
             <CardDescription className="text-slate-600">
               {step === 1 && 'Start by selecting the treatment you want.'}
               {step === 2 && 'Choose the stylist that matches your preference.'}
-              {step === 3 && 'Pick the date and available time slot.'}
+              {step === 3 && 'Pick the date and an available time slot.'}
               {step === 4 && 'Enter your contact details for the appointment.'}
               {step === 5 && 'Review everything before you submit.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
+            {loading ? (
+              <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading booking options...
+              </div>
+            ) : null}
+
             {step === 1 && (
               <div className="grid gap-4 md:grid-cols-2">
                 {services.map((service) => (
@@ -175,28 +311,38 @@ export default function BookingPage() {
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Available times
                     </label>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      {timeSlots.map((time) => (
-                        <button
-                          key={time}
-                          type="button"
-                          onClick={() => {
-                            setSelectedTime(time)
-                            setStep(4)
-                          }}
-                          className={`rounded-2xl border px-3 py-2 text-sm transition ${
-                            selectedTime === time
-                              ? 'border-cyan-200 bg-cyan-50 text-cyan-800'
-                              : 'border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-slate-50'
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      ))}
-                    </div>
+                    {loadingSlots ? (
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                        Loading times...
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {availableSlots.map((time) => (
+                          <button
+                            key={time}
+                            type="button"
+                            onClick={() => {
+                              setSelectedTime(time)
+                              setStep(4)
+                            }}
+                            className={`rounded-2xl border px-3 py-2 text-sm transition ${
+                              selectedTime === time
+                                ? 'border-cyan-200 bg-cyan-50 text-cyan-800'
+                                : 'border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-slate-50'
+                            }`}
+                          >
+                            {time}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => setStep(2)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(2)}
+                  className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
+                >
                   Back
                 </Button>
               </div>
@@ -218,6 +364,18 @@ export default function BookingPage() {
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-slate-900 outline-none focus:border-cyan-500"
+                    placeholder="09xx xxx xxxx"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
                     Email
                   </label>
                   <input
@@ -229,10 +387,17 @@ export default function BookingPage() {
                   />
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(3)} className="flex-1 rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(3)}
+                    className="flex-1 rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
+                  >
                     Back
                   </Button>
-                  <Button onClick={() => setStep(5)} className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                  <Button
+                    onClick={() => setStep(5)}
+                    className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800"
+                  >
                     Review
                   </Button>
                 </div>
@@ -268,11 +433,23 @@ export default function BookingPage() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(4)} className="flex-1 rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(4)}
+                    className="flex-1 rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
+                  >
                     Back
                   </Button>
-                  <Button type="submit" className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800">
-                    <CheckCircle2 className="h-4 w-4" />
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800"
+                  >
+                    {submitting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4" />
+                    )}
                     Confirm booking
                   </Button>
                 </div>
@@ -292,3 +469,4 @@ export default function BookingPage() {
     </SiteShell>
   )
 }
+

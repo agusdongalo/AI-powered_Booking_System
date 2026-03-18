@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { SiteShell } from '@/components/site-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/button'
+import { toast } from 'sonner'
 
 interface Service {
-  id: number
+  id: string
   name: string
   duration: number
   price: number
@@ -14,21 +16,35 @@ interface Service {
 }
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<Service[]>([
-    { id: 1, name: 'Haircut', duration: 45, price: 20, description: 'Standard haircut and styling' },
-    { id: 2, name: 'Hair Color', duration: 90, price: 80, description: 'Full hair coloring service' },
-    { id: 3, name: 'Balayage', duration: 120, price: 120, description: 'Balayage highlighting technique' },
-    { id: 4, name: 'Hair Treatment', duration: 60, price: 50, description: 'Deep conditioning and treatment' },
-  ])
-
+  const [services, setServices] = useState<Service[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     duration: '',
     price: '',
     description: '',
   })
+
+  useEffect(() => {
+    const loadServices = async () => {
+      setLoading(true)
+
+      try {
+        const response = await fetch('/api/services')
+        if (!response.ok) throw new Error('Failed to load services')
+        setServices(await response.json())
+      } catch {
+        toast.error('Could not load services')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void loadServices()
+  }, [])
 
   const handleAddService = () => {
     setEditingId(null)
@@ -47,37 +63,59 @@ export default function ServicesPage() {
     setShowForm(true)
   }
 
-  const handleSaveService = () => {
-    if (editingId) {
-      setServices((prev) =>
-        prev.map((s) =>
-          s.id === editingId
-            ? {
-                ...s,
-                name: formData.name,
-                duration: parseInt(formData.duration),
-                price: parseInt(formData.price),
-                description: formData.description,
-              }
-            : s
-        )
+  const handleSaveService = async () => {
+    setSaving(true)
+
+    try {
+      const response = await fetch(
+        editingId ? `/api/services?id=${editingId}` : '/api/services',
+        {
+          method: editingId ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        }
       )
-    } else {
-      const newService: Service = {
-        id: Math.max(...services.map((s) => s.id), 0) + 1,
-        name: formData.name,
-        duration: parseInt(formData.duration),
-        price: parseInt(formData.price),
-        description: formData.description,
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || 'Could not save service')
       }
-      setServices((prev) => [...prev, newService])
+
+      const saved = await response.json()
+
+      setServices((prev) =>
+        editingId
+          ? prev.map((service) => (service.id === editingId ? saved : service))
+          : [...prev, saved]
+      )
+      setShowForm(false)
+      toast.success('Service saved')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not save service')
+    } finally {
+      setSaving(false)
     }
-    setShowForm(false)
   }
 
-  const handleDeleteService = (id: number) => {
-    if (confirm('Are you sure you want to delete this service?')) {
-      setServices((prev) => prev.filter((s) => s.id !== id))
+  const handleDeleteService = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this service?')) return
+
+    try {
+      const response = await fetch(`/api/services?id=${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || 'Could not delete service')
+      }
+
+      setServices((prev) => prev.filter((service) => service.id !== id))
+      toast.success('Service deleted')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not delete service')
     }
   }
 
@@ -111,7 +149,7 @@ export default function ServicesPage() {
             <CardContent className="grid gap-4 md:grid-cols-2">
               {(['name', 'duration', 'price', 'description'] as const).map((field) => (
                 <div key={field} className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-700 capitalize">
+                  <label className="block text-sm font-medium capitalize text-slate-700">
                     {field}
                   </label>
                   <input
@@ -122,9 +160,9 @@ export default function ServicesPage() {
                   />
                 </div>
               ))}
-              <div className="md:col-span-2 flex gap-3 pt-2">
-                <Button onClick={handleSaveService} className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
-                  Save
+              <div className="flex gap-3 pt-2 md:col-span-2">
+                <Button onClick={handleSaveService} disabled={saving} className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
                 </Button>
                 <Button variant="outline" onClick={() => setShowForm(false)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
                   Cancel
@@ -136,37 +174,44 @@ export default function ServicesPage() {
 
         <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
           <CardContent className="overflow-x-auto p-0">
-            <table className="w-full">
-              <thead className="border-b border-slate-200 bg-slate-50">
-                <tr>
-                  {['Service', 'Duration', 'Price', 'Description', 'Action'].map((header) => (
-                    <th key={header} className="px-6 py-4 text-left text-sm font-semibold text-slate-900">
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((service) => (
-                  <tr key={service.id} className="border-b border-slate-100">
-                    <td className="px-6 py-4 font-semibold text-slate-900">{service.name}</td>
-                    <td className="px-6 py-4 text-slate-600">{service.duration} min</td>
-                    <td className="px-6 py-4 text-slate-900">${service.price}</td>
-                    <td className="px-6 py-4 text-slate-600">{service.description}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => handleEditService(service)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
-                          Edit
-                        </Button>
-                        <Button variant="outline" onClick={() => handleDeleteService(service.id)} className="rounded-full border-red-200 bg-white text-red-700 hover:bg-red-50">
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
+            {loading ? (
+              <div className="flex items-center gap-2 p-6 text-slate-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading services...
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="border-b border-slate-200 bg-slate-50">
+                  <tr>
+                    {['Service', 'Duration', 'Price', 'Description', 'Action'].map((header) => (
+                      <th key={header} className="px-6 py-4 text-left text-sm font-semibold text-slate-900">
+                        {header}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {services.map((service) => (
+                    <tr key={service.id} className="border-b border-slate-100">
+                      <td className="px-6 py-4 font-semibold text-slate-900">{service.name}</td>
+                      <td className="px-6 py-4 text-slate-600">{service.duration} min</td>
+                      <td className="px-6 py-4 text-slate-900">${service.price}</td>
+                      <td className="px-6 py-4 text-slate-600">{service.description}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <Button variant="outline" onClick={() => handleEditService(service)} className="rounded-full border-slate-300 bg-white text-slate-900 hover:bg-slate-50">
+                            Edit
+                          </Button>
+                          <Button variant="outline" onClick={() => handleDeleteService(service.id)} className="rounded-full border-red-200 bg-white text-red-700 hover:bg-red-50">
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </CardContent>
         </Card>
       </div>
