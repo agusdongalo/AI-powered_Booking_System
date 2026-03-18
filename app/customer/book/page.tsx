@@ -26,8 +26,8 @@ interface Stylist {
   }
 }
 
-function toDateTime(date: string, time: string) {
-  return new Date(`${date}T${time.length === 5 ? `${time}:00` : time}`)
+function toLocalDateTimeString(date: string, time: string) {
+  return `${date}T${time.length === 5 ? `${time}:00` : time}`
 }
 
 export default function BookingPage() {
@@ -54,6 +54,12 @@ export default function BookingPage() {
     () => stylists.find((stylist) => stylist.id === selectedStylist),
     [stylists, selectedStylist]
   )
+  const selectedTimeAvailable = Boolean(selectedTime && availableSlots.includes(selectedTime))
+  const customerDetailsComplete = Boolean(customerName.trim() && customerPhone.trim())
+  const canProceedToReview = Boolean(
+    currentService && currentStylist && selectedDate && selectedTimeAvailable
+  )
+  const canSubmitBooking = Boolean(canProceedToReview && customerDetailsComplete)
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -83,6 +89,27 @@ export default function BookingPage() {
 
     void loadInitialData()
   }, [])
+
+  useEffect(() => {
+    if (loading || services.length === 0) {
+      return
+    }
+
+    if (selectedService) {
+      return
+    }
+
+    const serviceId = new URLSearchParams(window.location.search).get('service')
+    if (!serviceId) {
+      return
+    }
+
+    const match = services.find((service) => service.id === serviceId)
+    if (match) {
+      setSelectedService(match.id)
+      setStep(2)
+    }
+  }, [loading, services, selectedService])
 
   useEffect(() => {
     if (!selectedDate || !selectedStylist || !currentService) {
@@ -123,11 +150,38 @@ export default function BookingPage() {
     return () => controller.abort()
   }, [selectedDate, selectedStylist, currentService])
 
+  useEffect(() => {
+    if (!selectedTime || loadingSlots) {
+      return
+    }
+
+    if (selectedDate && selectedStylist && currentService && !selectedTimeAvailable) {
+      setSelectedTime('')
+      if (step > 3) {
+        setStep(3)
+      }
+    }
+  }, [
+    currentService,
+    loadingSlots,
+    selectedDate,
+    selectedStylist,
+    selectedTime,
+    selectedTimeAvailable,
+    step,
+  ])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!currentService || !currentStylist || !selectedDate || !selectedTime) {
       toast.error('Please complete the booking details')
+      return
+    }
+
+    if (!selectedTimeAvailable) {
+      toast.error('Selected time is no longer available. Please choose another slot.')
+      setStep(3)
       return
     }
 
@@ -145,7 +199,7 @@ export default function BookingPage() {
           customerEmail,
           serviceId: currentService.id,
           stylistId: currentStylist.id,
-          startTime: toDateTime(selectedDate, selectedTime).toISOString(),
+          startTime: toLocalDateTimeString(selectedDate, selectedTime),
           status: 'confirmed',
         }),
       })
@@ -315,7 +369,7 @@ export default function BookingPage() {
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
                         Loading times...
                       </div>
-                    ) : (
+                    ) : availableSlots.length > 0 ? (
                       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {availableSlots.map((time) => (
                           <button
@@ -330,10 +384,19 @@ export default function BookingPage() {
                                 ? 'border-cyan-200 bg-cyan-50 text-cyan-800'
                                 : 'border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-slate-50'
                             }`}
-                          >
-                            {time}
-                          </button>
+                            >
+                              {time}
+                            </button>
                         ))}
+                      </div>
+                    ) : selectedDate && selectedStylist && currentService ? (
+                      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        No available times for this stylist and service on the selected date.
+                        Try another day or choose a different stylist.
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                        Select a date and stylist to see available times.
                       </div>
                     )}
                   </div>
@@ -397,6 +460,7 @@ export default function BookingPage() {
                   <Button
                     onClick={() => setStep(5)}
                     className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800"
+                    disabled={!canProceedToReview}
                   >
                     Review
                   </Button>
@@ -422,7 +486,13 @@ export default function BookingPage() {
                     </div>
                     <div className="flex justify-between gap-4">
                       <span className="text-slate-500">Time</span>
-                      <span className="font-medium text-slate-900">{selectedTime || 'Not selected'}</span>
+                      <span
+                        className={`font-medium ${
+                          selectedTimeAvailable ? 'text-slate-900' : 'text-rose-700'
+                        }`}
+                      >
+                        {selectedTime || 'Not selected'}
+                      </span>
                     </div>
                     <div className="flex justify-between gap-4 border-t border-slate-200 pt-3">
                       <span className="text-slate-500">Total</span>
@@ -442,7 +512,7 @@ export default function BookingPage() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || !canSubmitBooking}
                     className="flex-1 rounded-full bg-slate-900 text-white hover:bg-slate-800"
                   >
                     {submitting ? (
@@ -453,6 +523,16 @@ export default function BookingPage() {
                     Confirm booking
                   </Button>
                 </div>
+                {!customerDetailsComplete ? (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    Please enter your name and phone number before confirming the booking.
+                  </div>
+                ) : null}
+                {!selectedTimeAvailable ? (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                    This time is no longer available. Please go back and choose another slot.
+                  </div>
+                ) : null}
               </form>
             )}
 

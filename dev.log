@@ -1,0 +1,39 @@
+
+> salon-booking-app@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.100.12:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ⨯ devtoolSegmentExplorer
+
+ ✓ Starting...
+ ✓ Ready in 2.5s
+ ○ Compiling /api/chat/message ...
+ ✓ Compiled /api/chat/message in 7.4s (2499 modules)
+ GET / 200 in 8779ms
+ POST /api/chat/message 201 in 8533ms
+ POST /api/chat/message 201 in 53ms
+ ○ Compiling /chat ...
+ ✓ Compiled /chat in 946ms (2522 modules)
+ GET /chat 200 in 1332ms
+ POST /api/chat/message 201 in 333ms
+ POST /api/chat/message 201 in 207ms
+ POST /api/chat/message 201 in 201ms
+ POST /api/chat/message 201 in 208ms
+ GET / 200 in 97ms
+ ○ Compiling /api/services ...
+ ✓ Compiled /api/services in 4s (2526 modules)
+ GET / 200 in 354ms
+ GET /api/stylists 200 in 4450ms
+ GET /api/services 200 in 4454ms
+ GET /api/stylists 200 in 56ms
+ GET /api/services 200 in 66ms
+ GET /api/services 200 in 49ms
+ GET /api/stylists 200 in 62ms
+ ○ Compiling /api/availability/check ...
+ ✓ Compiled /api/availability/check in 1001ms (2528 modules)
+ GET /api/availability/check?date=2026-03-25&stylistId=2&duration=30 200 in 1252ms
+ ✓ Compiled in 613ms (1316 modules)

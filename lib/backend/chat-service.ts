@@ -536,7 +536,7 @@ async function findAvailableStylistForExactTime(params: { date: string; serviceD
 }
 
 function introMessage() {
-  return 'I can help with bookings, availability, prices, service recommendations, stylists, reschedules, and cancellations. Tell me what you want and I will keep the salon context in mind.'
+  return 'I can help you book an appointment, check prices and availability, or move and cancel a booking. Tell me the service, date, and time you want.'
 }
 
 export async function listChatConversation(conversationId: string) {

@@ -23,7 +23,6 @@ import {
 } from '@/components/card'
 import { Button } from '@/components/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/avatar'
-import { BookingDialog } from '@/components/booking-dialog'
 const featurePillars = [
   {
     icon: Sparkles,
@@ -67,8 +66,6 @@ const journeySteps = [
 ]
 
 export default function Home() {
-  const [selectedService, setSelectedService] = useState<string | null>(null)
-  const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [services, setServices] = useState<
     { id: string; name: string; duration: number; price: number; description: string }[]
   >([])
@@ -98,9 +95,13 @@ export default function Home() {
     void loadCatalog()
   }, [])
 
-  const openBooking = (serviceId?: string) => {
-    setSelectedService(serviceId ?? null)
-    setIsBookingOpen(true)
+  const bookingHref = (serviceId?: string) => {
+    if (!serviceId) {
+      return '/customer/book'
+    }
+
+    const params = new URLSearchParams({ service: serviceId })
+    return `/customer/book?${params.toString()}`
   }
 
   return (
@@ -156,10 +157,12 @@ export default function Home() {
 
             <Button
               className="rounded-full border border-white/70 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 px-5 text-white shadow-[0_16px_34px_-12px_rgba(59,130,246,0.75),inset_0_1px_0_rgba(255,255,255,0.65)] hover:from-sky-400 hover:via-blue-400 hover:to-indigo-400"
-              onClick={() => openBooking()}
+              asChild
             >
-              Book now
-              <ArrowRight className="h-4 w-4" />
+              <Link href="/customer/book">
+                Book now
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </nav>
         </header>
@@ -323,9 +326,11 @@ export default function Home() {
                         <Button
                           size="sm"
                           className="rounded-full border border-white/70 bg-gradient-to-r from-sky-500 to-blue-500 px-4 text-white shadow-[0_14px_30px_-16px_rgba(59,130,246,0.8),inset_0_1px_0_rgba(255,255,255,0.7)] hover:from-sky-400 hover:to-blue-400"
-                          onClick={() => openBooking('1')}
+                          asChild
                         >
-                          Book it
+                          <Link href={bookingHref(services.find((service) => service.name === 'Balayage')?.id)}>
+                            Book it
+                          </Link>
                         </Button>
                       </div>
                     </div>
@@ -423,10 +428,12 @@ export default function Home() {
 
                   <Button
                     className="w-full rounded-full bg-slate-900 px-5 text-white hover:bg-slate-800"
-                    onClick={() => openBooking(service.id)}
+                    asChild
                   >
-                    Book this service
-                    <ArrowRight className="h-4 w-4" />
+                    <Link href={bookingHref(service.id)}>
+                      Book this service
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -518,13 +525,12 @@ export default function Home() {
                       {stylist.workingHours.start} - {stylist.workingHours.end}
                     </span>
                   </div>
-                  <button
-                    type="button"
+                  <Button
                     className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 transition hover:bg-slate-50"
-                    onClick={() => openBooking()}
+                    asChild
                   >
-                    Book
-                  </button>
+                    <Link href="/customer/book">Book</Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -562,11 +568,6 @@ export default function Home() {
         </footer>
       </div>
 
-      <BookingDialog
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-        preSelectedServiceId={selectedService}
-      />
     </main>
   )
 }
