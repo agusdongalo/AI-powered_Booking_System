@@ -7,7 +7,6 @@ import {
   ClipboardList,
   MessageCircle,
   Sparkles,
-  Scissors,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/button'
@@ -38,16 +37,16 @@ export default function CustomerHome() {
   return (
     <SiteShell
       title="Customer Portal"
-      description="A glassmorphism front end for customers to book, chat, and manage appointments."
+      description="Minimal workspace for booking, chat, and appointment management."
       navHref="/customer"
       navLabel="Customer"
       backHref="/"
       accent="cyan"
     >
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+        <Card className="border-slate-300 bg-[#fcfbf8] shadow-none">
           <CardHeader>
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm text-cyan-800">
+            <div className="inline-flex items-center gap-2 rounded-[6px] border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
               <Sparkles className="h-4 w-4" />
               Customer actions
             </div>
@@ -64,8 +63,8 @@ export default function CustomerHome() {
 
               return (
                 <Link key={action.title} href={action.href} className="group">
-                  <div className="h-full rounded-[24px] border border-slate-200 bg-white/90 p-5 transition hover:-translate-y-1 hover:border-cyan-200 hover:shadow-[0_18px_40px_-24px_rgba(15,23,42,0.2)]">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-cyan-700">
+                  <div className="h-full rounded-[6px] border border-slate-300 bg-white p-5 transition-colors hover:bg-slate-50">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[6px] border border-slate-300 bg-white text-slate-700">
                       <Icon className="h-5 w-5" />
                     </div>
                     <h2 className="display-font text-2xl text-slate-900">
@@ -85,7 +84,7 @@ export default function CustomerHome() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 bg-white/80 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+        <Card className="border-slate-300 bg-[#fcfbf8] shadow-none">
           <CardHeader>
             <CardTitle className="display-font text-3xl text-slate-900">
               Popular services
@@ -103,7 +102,7 @@ export default function CustomerHome() {
             ].map((service) => (
               <div
                 key={service.name}
-                className="flex items-center justify-between rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-3"
+                className="flex items-center justify-between rounded-[6px] border border-slate-300 bg-white px-4 py-3"
               >
                 <div>
                   <p className="font-semibold text-slate-900">{service.name}</p>
@@ -114,7 +113,7 @@ export default function CustomerHome() {
                 </div>
               </div>
             ))}
-            <Button className="w-full rounded-full bg-slate-900 text-white hover:bg-slate-800" asChild>
+            <Button className="w-full" asChild>
               <Link href="/customer/book">Book a service</Link>
             </Button>
           </CardContent>

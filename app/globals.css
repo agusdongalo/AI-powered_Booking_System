@@ -3,8 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --font-body: 'Aptos', 'Segoe UI', 'Trebuchet MS', sans-serif;
-  --font-display: 'Georgia', 'Times New Roman', serif;
+  --font-body: 'Aptos', 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-display: 'Iowan Old Style', 'Bodoni MT', 'Times New Roman', serif;
+  --bg: #f4f2ee;
+  --surface: #fcfbf8;
+  --surface-muted: #efebe4;
+  --text: #111111;
+  --muted: #5d5952;
+  --line: #d8d3cc;
+  --brand: #1f2937;
 }
 
 * {
@@ -22,25 +29,17 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fbff;
-  background-image:
-    radial-gradient(circle at 14% 10%, rgba(191, 219, 254, 0.42), transparent 24%),
-    radial-gradient(circle at 84% 18%, rgba(244, 183, 255, 0.3), transparent 26%),
-    radial-gradient(circle at 50% 104%, rgba(219, 234, 254, 0.22), transparent 24%),
-    linear-gradient(to right, rgba(191, 219, 254, 0.18) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(191, 219, 254, 0.18) 1px, transparent 1px);
-  background-size: auto, auto, auto, 56px 56px, 56px 56px;
-  background-position: top left, top right, bottom center, 0 0, 0 0;
-  background-attachment: fixed;
-  color: #0f172a;
+  background-color: var(--bg);
+  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+  color: var(--text);
 }
 
 .display-font {
   font-family: var(--font-display);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 ::selection {
-  background: rgba(103, 232, 249, 0.35);
-  color: #f8fafc;
+  background: rgba(17, 17, 17, 0.12);
+  color: var(--text);
 }

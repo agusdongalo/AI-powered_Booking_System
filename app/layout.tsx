@@ -3,8 +3,8 @@ import './globals.css'
 import { Toaster } from '@/components/sonner'
 
 export const metadata: Metadata = {
-  title: 'Glamour Studio | AI Booking Lounge',
-  description: 'A glassmorphism homepage for AI-assisted salon booking.',
+  title: 'Glamour Studio | Premium Booking System',
+  description: 'Minimalist salon booking with AI concierge and staff scheduling.',
 }
 
 export default function RootLayout({
